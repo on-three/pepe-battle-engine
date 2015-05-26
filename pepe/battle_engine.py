@@ -15,7 +15,11 @@ from random import randint
 from scipy import misc
 import numpy as np
 
-def mse(A, B):
+DEFENSE_PEPE = 'smug_pepe.jpg'
+ATTACK_PEPE = 'angry_pepe.jpg'
+HITPOINT_PEPE = 'feelsgoodman.jpg'
+
+def mse_by_files(A, B):
   # the 'Mean Squared Error' between the two images is the
   # sum of the squared difference between the two images;
   # NOTE: the two images must have the same dimension
@@ -34,6 +38,33 @@ def mse(A, B):
   # the two images are
   return err
 
+def mse(A, B):
+  err = np.sum((A.astype("float") - B.astype("float")) ** 2)
+  err /= float(A.shape[0] * A.shape[1])
+  return err
+
+def generate_defense(image):
+  defense_image = misc.imread(DEFENSE_PEPE)
+  defense_mse = mse(defense_image, image)
+  #perfect match to defense image will result in value 0
+  #a bad fit will result in a value of about 35605
+  #worst case for 600x600 is 195075
+  #so map range of 0 to 200k to defense 0 to 50 with peak desired (25?) at 35k
+  #return defense_mse
+  return randint(10,50)
+
+def generate_attack(image):
+  attack_image = misc.imread(ATTACK_PEPE)
+  #return mse(attack_image, image)
+  return randint(10,50)
+
+def generate_hitpoints(image):
+  hitpoints_image = misc.imread(HITPOINT_PEPE)
+  #return mse(hitpoints_image, image)
+  return randint(10,50)
+
+
+
 class Pepe(object):
   def __init__(self, image_url):
     self._image_url = image_url
@@ -46,9 +77,14 @@ class Pepe(object):
     '''
     Initialize own attack, defense etc via image qualities
     '''
-    self._attack = randint(1,50)
-    self._defense = randint(1,50)
-    self._hit_points = randint(10,50)
+    # self._attack = randint(1,50)
+    # self._defense = randint(1,50)
+    # self._hit_points = randint(10,50)
+    image = misc.imread(self._image_url)
+    image.resize((600, 600, 3))
+    self._attack = generate_attack(image)
+    self._defense = generate_defense(image)
+    self._hit_points = generate_hitpoints(image)
 
   @property
   def hit_points(self):
@@ -133,7 +169,7 @@ def main():
   pepe_2 = Pepe(args.pepe_2)
   print 'pepe 2: ' + unicode(pepe_2).format('utf-8')
 
-  meansqerror = mse(args.pepe_1, args.pepe_2)
+  meansqerror = mse_by_files(args.pepe_1, args.pepe_2)
   print "MSE is : " + str(meansqerror)
 
   #let the two fight it out
