@@ -12,6 +12,28 @@ import argparse
 
 from random import randint
 
+from scipy import misc
+import numpy as np
+
+def mse(A, B):
+  # the 'Mean Squared Error' between the two images is the
+  # sum of the squared difference between the two images;
+  # NOTE: the two images must have the same dimension
+  print "image A : " + A
+  print "image B : " + B
+  imageA = misc.imread(A)
+  imageB = misc.imread(B)
+  #resize B to match the size of A
+  imageB.resize(imageA.shape) 
+  print "shape of a is " + str(imageA.shape)
+  print "shape of b is " + str(imageB.shape)
+  err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
+  err /= float(imageA.shape[0] * imageA.shape[1])
+  
+  # return the MSE, the lower the error, the more "similar"
+  # the two images are
+  return err
+
 class Pepe(object):
   def __init__(self, image_url):
     self._image_url = image_url
@@ -110,6 +132,9 @@ def main():
   print 'pepe 1: ' + unicode(pepe_1).format('utf-8')
   pepe_2 = Pepe(args.pepe_2)
   print 'pepe 2: ' + unicode(pepe_2).format('utf-8')
+
+  meansqerror = mse(args.pepe_1, args.pepe_2)
+  print "MSE is : " + str(meansqerror)
 
   #let the two fight it out
   results = Combat(pepe_1, pepe_2)
